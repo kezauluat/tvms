@@ -1,0 +1,101 @@
+# Databases + RabbitMQ + Mailpit only:   docker compose up -d
+# Whole system (adds backend + frontend): docker compose --profile app up -d --build
+services:
+  postgres:
+    image: postgres:17
+    container_name: tvms-postgres
+    environment:
+      POSTGRES_DB: traffic_violation_db
+      POSTGRES_USER: tvms
+      POSTGRES_PASSWORD: tvms123
+    ports:
+      - "5434:5432"
+    volumes:
+      - tvms-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tvms -d traffic_violation_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mongo:
+    image: mongo:7
+    container_name: tvms-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - tvms-mongodata:/data/db
+
+  redis:
+    image: redis:7
+    container_name: tvms-redis
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: tvms-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: tvms
+      RABBITMQ_DEFAULT_PASS: tvms123
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: tvms-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  backend:
+    build: ./backend
+    container_name: tvms-backend
+    profiles: ["app"]
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+      redis:
+        condition: service_started
+      mailpit:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/traffic_violation_db
+      SPRING_MONGODB_URI: mongodb://mongo:27017/tvms
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/tvms
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_MAIL_HOST: mailpit
+      APP_FRONTEND_URL: http://localhost:3000
+      JWT_SECRET: ${JWT_SECRET:-tvms-docker-secret-change-me-in-production-2026}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-change-me}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-change-me}
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8080
+    container_name: tvms-frontend
+    profiles: ["app"]
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  tvms-pgdata:
+  tvms-mongodata:

@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+html { -webkit-text-size-adjust: 100%; }
+body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+
+/* Road-marking stripe used under the header */
+.road-stripe {
+  background-image: repeating-linear-gradient(90deg, #fbbf24 0 28px, transparent 28px 44px);
+  height: 4px;
+}
