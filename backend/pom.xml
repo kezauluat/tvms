@@ -14,7 +14,7 @@
     <name>TrafficViolationManagementSystem</name>
     <description>Traffic Violation and Fine Management System - REST API</description>
     <properties>
-        <java.version>25</java.version>
+        <java.version>17</java.version>
     </properties>
     <dependencies>
         <dependency>
