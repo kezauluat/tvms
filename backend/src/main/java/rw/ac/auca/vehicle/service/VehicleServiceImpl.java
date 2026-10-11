@@ -26,6 +26,8 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public Vehicle registerVehicle(Vehicle vehicle) {
+        vehicle.setId(null);
+        vehicle.setPlateNumber(normalizePlate(vehicle.getPlateNumber()));
         validateVehicle(vehicle, null);
         Driver owner = resolveOwner(vehicle);
         vehicle.setOwner(owner);
@@ -35,6 +37,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public Vehicle updateVehicle(UUID id, Vehicle vehicle) {
         Vehicle found = findVehicleById(id);
+        vehicle.setPlateNumber(normalizePlate(vehicle.getPlateNumber()));
         validateVehicle(vehicle, id);
         Driver owner = resolveOwner(vehicle);
         found.setPlateNumber(vehicle.getPlateNumber());
@@ -60,6 +63,18 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public List<Vehicle> findAllVehicles() {
         return vehicleRepository.findAll();
+    }
+
+    @Override
+    public Vehicle findVehicleByPlate(String plateNumber) {
+        String plate = normalizePlate(plateNumber);
+        return vehicleRepository.findByPlateNumber(plate)
+                .orElseThrow(() -> new ResourceNotFoundException("No registered vehicle with plate " + plate));
+    }
+
+    /** "rab 123 a" -> "RAB123A" so officers and owners can type plates naturally. */
+    public static String normalizePlate(String plateNumber) {
+        return plateNumber == null ? null : plateNumber.replaceAll("\\s+", "").toUpperCase();
     }
 
     private Driver resolveOwner(Vehicle vehicle) {

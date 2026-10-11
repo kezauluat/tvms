@@ -20,6 +20,8 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public Driver registerDriver(Driver driver) {
+        driver.setId(null); // never let a client overwrite an existing record through POST
+        driver.setLicenseNumber(normalizeLicense(driver.getLicenseNumber()));
         validateDriver(driver, null);
         return driverRepository.save(driver);
     }
@@ -27,6 +29,7 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public Driver updateDriver(UUID id, Driver driver) {
         Driver found = findDriverById(id);
+        driver.setLicenseNumber(normalizeLicense(driver.getLicenseNumber()));
         validateDriver(driver, id);
         found.setFullName(driver.getFullName());
         found.setLicenseNumber(driver.getLicenseNumber());
@@ -51,6 +54,10 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public List<Driver> findAllDrivers() {
         return driverRepository.findAll();
+    }
+
+    private static String normalizeLicense(String licenseNumber) {
+        return licenseNumber == null ? null : licenseNumber.trim().toUpperCase();
     }
 
     // Business logic validation: minimum driving age + unique license number

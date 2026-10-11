@@ -1,7 +1,12 @@
 package rw.ac.auca.driver.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -9,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import rw.ac.auca.auth.domain.User;
 import rw.ac.auca.base.BaseEntity;
 
 import java.time.LocalDate;
@@ -18,6 +24,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Driver extends BaseEntity {
 
     @NotBlank(message = "Full name is required")
@@ -39,4 +46,10 @@ public class Driver extends BaseEntity {
 
     @Column(name = "address")
     private String address;
+
+    /** Login account of this driver; null until the driver registers on the portal. */
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
 }

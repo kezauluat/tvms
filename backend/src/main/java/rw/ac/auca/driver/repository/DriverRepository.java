@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface DriverRepository extends JpaRepository<Driver, UUID> {
     Optional<Driver> findByLicenseNumber(String licenseNumber);
+    Optional<Driver> findByUserId(UUID userId);
 }

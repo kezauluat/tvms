@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface OfficerRepository extends JpaRepository<Officer, UUID> {
     Optional<Officer> findByBadgeNumber(String badgeNumber);
+    Optional<Officer> findByUserId(UUID userId);
 }

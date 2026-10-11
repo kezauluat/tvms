@@ -1,0 +1,77 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: TrafficViolationManagementSystem
+
+  # PostgreSQL: drivers, vehicles, officers, violations, fines, users
+  datasource:
+    url: jdbc:postgresql://localhost:5434/traffic_violation_db
+    username: tvms
+    password: tvms123
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    show-sql: false
+
+  # MongoDB: violation evidence, notification logs, audit logs
+  mongodb:
+    uri: mongodb://localhost:27017/tvms
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/tvms
+      auto-index-creation: true
+    redis:
+      host: localhost
+      port: 6379
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 10m
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: tvms
+    password: tvms123
+    listener:
+      simple:
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 2s
+
+  mail:
+    host: localhost
+    port: 1025
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:change-me}
+            client-secret: ${GOOGLE_CLIENT_SECRET:change-me}
+            scope: openid, profile, email
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:tvms-dev-secret-key-change-me-in-production-2026}
+    access-expiration-ms: 900000
+    refresh-expiration-days: 7
+  frontend-url: ${APP_FRONTEND_URL:http://localhost:5173}
+  cors-origins: http://localhost:5173,http://localhost:3000
+  admin:
+    email: admin@tvms.rw
+    password: Admin@12345
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

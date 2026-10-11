@@ -11,4 +11,5 @@ public interface VehicleService {
     void deleteVehicle(UUID id);
     Vehicle findVehicleById(UUID id);
     List<Vehicle> findAllVehicles();
+    Vehicle findVehicleByPlate(String plateNumber);
 }

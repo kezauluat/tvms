@@ -18,6 +18,7 @@ public class OfficerServiceImpl implements OfficerService {
 
     @Override
     public Officer registerOfficer(Officer officer) {
+        officer.setId(null);
         validateOfficer(officer, null);
         return officerRepository.save(officer);
     }
